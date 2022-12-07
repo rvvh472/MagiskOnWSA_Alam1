@@ -1,0 +1,27 @@
+id: create_release
+        uses: actions/create-release@v1
+        if: ${{ steps.checkTag.outputs.exists == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.vars.outputs.sha_short }}
+          release_name: MagiskOnWSA
+          draft: false
+          prerelease: false
+      
+      - id: release_info
+        uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
+        with:
+          tag: ${{ steps.vars.outputs.sha_short }}
+          token: ${{ github.token }}
+          
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release_info.outputs.uploadUrl }}
+          asset_path: ${{ steps.run.outputs.path }}
+          asset_name: ${{ steps.run.outputs.name }}
+          asset_content_type: application/x-7z-compressed
